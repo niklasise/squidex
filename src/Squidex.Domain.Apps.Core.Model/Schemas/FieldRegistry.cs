@@ -12,58 +12,28 @@ using Squidex.Infrastructure;
 
 namespace Squidex.Domain.Apps.Core.Schemas
 {
-    public sealed class FieldRegistry
+    public static class FieldRegistry
     {
-        private readonly TypeNameRegistry typeNameRegistry;
-        private readonly HashSet<Type> supportedFields = new HashSet<Type>();
+        private const string Suffix = "Properties";
+        private const string SuffixOld = "FieldProperties";
 
-        public FieldRegistry(TypeNameRegistry typeNameRegistry)
+        public static TypeNameRegistry MapFields(this TypeNameRegistry typeNameRegistry)
         {
-            Guard.NotNull(typeNameRegistry, nameof(typeNameRegistry));
+            var types = typeof(FieldRegistry).Assembly.GetTypes().Where(x => typeof(FieldProperties).IsAssignableFrom(x) && !x.IsAbstract);
 
-            this.typeNameRegistry = typeNameRegistry;
-
-            var types = typeof(FieldRegistry).Assembly.GetTypes().Where(x => x.BaseType == typeof(FieldProperties));
+            var addedTypes = new HashSet<Type>();
 
             foreach (var type in types)
             {
-                RegisterField(type);
+                if (addedTypes.Add(type))
+                {
+                    typeNameRegistry.Map(type, type.TypeName(false, Suffix));
+
+                    typeNameRegistry.MapObsolete(type, type.TypeName(false, SuffixOld));
+                }
             }
 
-            typeNameRegistry.MapObsolete(typeof(ReferencesFieldProperties), "References");
-            typeNameRegistry.MapObsolete(typeof(DateTimeFieldProperties), "DateTime");
-        }
-
-        private void RegisterField(Type type)
-        {
-            if (supportedFields.Add(type))
-            {
-                typeNameRegistry.Map(type);
-            }
-        }
-
-        public RootField CreateRootField(long id, string name, Partitioning partitioning, FieldProperties properties, IFieldSettings settings = null)
-        {
-            CheckProperties(properties);
-
-            return properties.CreateRootField(id, name, partitioning, settings);
-        }
-
-        public NestedField CreateNestedField(long id, string name, FieldProperties properties, IFieldSettings settings = null)
-        {
-            CheckProperties(properties);
-
-            return properties.CreateNestedField(id, name, settings);
-        }
-
-        private void CheckProperties(FieldProperties properties)
-        {
-            Guard.NotNull(properties, nameof(properties));
-
-            if (!supportedFields.Contains(properties.GetType()))
-            {
-                throw new InvalidOperationException($"The field property '{properties.GetType()}' is not supported.");
-            }
+            return typeNameRegistry;
         }
     }
 }

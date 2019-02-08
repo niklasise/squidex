@@ -5,7 +5,6 @@
  * Copyright (c) Squidex UG (haftungsbeschränkt). All rights reserved.
  */
 
-
 // tslint:disable:prefer-for-of
 
 import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
@@ -147,7 +146,7 @@ export class FieldValidatorsFactory implements FieldPropertiesVisitor<ValidatorF
 
     public visitNumber(properties: NumberFieldPropertiesDto): ValidatorFn[] {
         const validators: ValidatorFn[] = [
-            ValidatorsEx.betweenLength(properties.minValue, properties.maxValue)
+            ValidatorsEx.between(properties.minValue, properties.maxValue)
         ];
 
         if (properties.allowedValues && properties.allowedValues.length > 0) {

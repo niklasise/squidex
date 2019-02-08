@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Squidex.Domain.Apps.Core;
 using Squidex.Domain.Apps.Core.Apps.Json;
+using Squidex.Domain.Apps.Core.HandleRules;
 using Squidex.Domain.Apps.Core.Rules.Json;
 using Squidex.Domain.Apps.Core.Schemas;
 using Squidex.Domain.Apps.Core.Schemas.Json;
@@ -25,20 +26,20 @@ namespace Squidex.Config.Domain
     public static class SerializationServices
     {
         private static readonly TypeNameRegistry TypeNameRegistry =
-             new TypeNameRegistry()
-                 .MapUnmapped(SquidexCoreModel.Assembly)
-                 .MapUnmapped(SquidexEvents.Assembly)
-                 .MapUnmapped(SquidexInfrastructure.Assembly)
-                 .MapUnmapped(SquidexMigrations.Assembly);
-        private static readonly FieldRegistry FieldRegistry = new FieldRegistry(TypeNameRegistry);
+            new TypeNameRegistry()
+                .MapFields()
+                .MapRules()
+                .MapRuleActions()
+                .MapUnmapped(SquidexCoreModel.Assembly)
+                .MapUnmapped(SquidexEvents.Assembly)
+                .MapUnmapped(SquidexInfrastructure.Assembly)
+                .MapUnmapped(SquidexMigrations.Assembly);
 
         public static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings();
         public static readonly JsonSerializer DefaultJsonSerializer;
 
         private static void ConfigureJson(JsonSerializerSettings settings, TypeNameHandling typeNameHandling)
         {
-            RuleElementRegistry.RegisterTypes(TypeNameRegistry);
-
             settings.SerializationBinder = new TypeNameSerializationBinder(TypeNameRegistry);
 
             settings.ContractResolver = new ConverterContractResolver(
@@ -77,7 +78,6 @@ namespace Squidex.Config.Domain
 
         public static IServiceCollection AddMySerializers(this IServiceCollection services)
         {
-            services.AddSingleton(FieldRegistry);
             services.AddSingleton(DefaultJsonSettings);
             services.AddSingleton(DefaultJsonSerializer);
             services.AddSingleton(TypeNameRegistry);

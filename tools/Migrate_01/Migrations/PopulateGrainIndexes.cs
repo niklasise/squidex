@@ -82,11 +82,11 @@ namespace Migrate_01.Migrations
         {
             var rulesByApp = new Dictionary<Guid, HashSet<Guid>>();
 
-            await statesForRules.ReadAllAsync((schema, version) =>
+            await statesForRules.ReadAllAsync((rule, version) =>
             {
-                if (!schema.IsDeleted)
+                if (!rule.IsDeleted)
                 {
-                    rulesByApp.GetOrAddNew(schema.AppId.Id).Add(schema.Id);
+                    rulesByApp.GetOrAddNew(rule.AppId.Id).Add(rule.Id);
                 }
 
                 return TaskHelper.Done;
@@ -106,7 +106,7 @@ namespace Migrate_01.Migrations
             {
                 if (!schema.IsDeleted)
                 {
-                    schemasByApp.GetOrAddNew(schema.AppId.Id)[schema.Name] = schema.Id;
+                    schemasByApp.GetOrAddNew(schema.AppId.Id)[schema.SchemaDef.Name] = schema.Id;
                 }
 
                 return TaskHelper.Done;

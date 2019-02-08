@@ -1,18 +1,14 @@
 ﻿// ==========================================================================
 //  Squidex Headless CMS
 // ==========================================================================
-//  Copyright (c) Squidex UG (haftungsbeschränkt)
+//  Copyright (c) Squidex UG (haftungsbeschraenkt)
 //  All rights reserved. Licensed under the MIT license.
 // ==========================================================================
 
-using System.Collections.Generic;
-
 namespace Squidex.Domain.Apps.Entities.Schemas.Commands
 {
-    public sealed class CreateSchemaField : CreateSchemaFieldBase
+    public abstract class ParentFieldCommand : SchemaCommand
     {
-        public string Partitioning { get; set; } = "invariant";
-
-        public List<CreateSchemaNestedField> Nested { get; set; }
+        public long? ParentFieldId { get; set; }
     }
 }

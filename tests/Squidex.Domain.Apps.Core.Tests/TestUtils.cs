@@ -11,6 +11,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Squidex.Domain.Apps.Core.Apps.Json;
+using Squidex.Domain.Apps.Core.HandleRules;
 using Squidex.Domain.Apps.Core.Rules.Json;
 using Squidex.Domain.Apps.Core.Schemas;
 using Squidex.Domain.Apps.Core.Schemas.Json;
@@ -28,7 +29,11 @@ namespace Squidex.Domain.Apps.Core
 
         public static IJsonSerializer CreateSerializer(TypeNameHandling typeNameHandling = TypeNameHandling.Auto)
         {
-            var typeNameRegistry = new TypeNameRegistry();
+            var typeNameRegistry =
+                new TypeNameRegistry()
+                    .MapFields()
+                    .MapRules()
+                    .MapUnmapped(typeof(TestUtils).Assembly);
 
             var serializerSettings = new JsonSerializerSettings
             {
@@ -59,9 +64,9 @@ namespace Squidex.Domain.Apps.Core
             return new NewtonsoftJsonSerializer(serializerSettings);
         }
 
-        public static Schema MixedSchema()
+        public static Schema MixedSchema(bool isSingleton = false)
         {
-            var schema = new Schema("user")
+            var schema = new Schema("user", isSingleton: isSingleton)
                 .Publish()
                 .AddArray(101, "root-array", Partitioning.Language, f => f
                     .AddAssets(201, "nested-assets")
